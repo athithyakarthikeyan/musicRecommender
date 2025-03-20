@@ -7,7 +7,7 @@ from sklearn.neighbors import NearestNeighbors
 import pickle
 
 # ✅ Load dataset
-df = pd.read_csv("tamil_spotify_tracks.csv")
+df = pd.read_csv("spotify_tracks_preprocessed.csv")
 
 # ✅ Ensure no missing values in important columns
 df["artist"] = df["artist"].fillna("")
@@ -26,7 +26,7 @@ knn_model = NearestNeighbors(n_neighbors=10, metric="euclidean")
 knn_model.fit(feature_matrix)
 
 # ✅ Save Preprocessed Data and KNN Model
-df.to_csv("tamil_spotify_tracks_preprocessed.csv", index=False)
+df.to_csv("spotify_tracks_preprocessed.csv", index=False)  # ✅ Save processed data
 
 with open("knn_model.pkl", "wb") as f:
     pickle.dump(knn_model, f)

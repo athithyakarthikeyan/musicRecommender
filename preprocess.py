@@ -9,7 +9,8 @@ from sklearn.metrics.pairwise import cosine_similarity
 import pickle
 
 # ✅ Load the original dataset
-df = pd.read_csv("tamil_spotify_tracks.csv")
+df = pd.read_csv("spotify_playlist_data.csv")  # ✅ Use the correct CSV file
+
 
 # ✅ Keep album_art_url in the processed data
 album_art_urls = df["album_art_url"]
@@ -35,7 +36,8 @@ similarity_matrix = (numeric_similarity * 0.5) + (genre_similarity * 0.5)
 df["album_art_url"] = album_art_urls
 
 # ✅ Save preprocessed data
-df.to_csv("tamil_spotify_tracks_preprocessed.csv", index=False)
+df.to_csv("spotify_tracks_preprocessed.csv", index=False)  # ✅ Save processed data
+
 with open("similarity_matrix.pkl", "wb") as f:
     pickle.dump(similarity_matrix, f)
 

@@ -2,9 +2,21 @@ import streamlit as st
 import pandas as pd
 import pickle
 import difflib
+import uuid
 
 # ✅ Load Preprocessed Data and KNN Model
-df = pd.read_csv("tamil_spotify_tracks_preprocessed.csv")
+df = pd.read_csv("spotify_playlist_data.csv")
+if "combined_features" not in df.columns:
+    print("⚠ 'combined_features' missing! Recomputing...")
+    df["artist"] = df["artist"].fillna("")
+    df["album"] = df["album"].fillna("")
+    df["genres"] = df["genres"].fillna("")
+    df["name"] = df["name"].fillna("").astype(str)
+    
+    df["combined_features"] = df["artist"] + " " + df["album"] + " " + df["genres"]
+    df.to_csv("spotify_tracks_preprocessed.csv", index=False)  # ✅ Save the fixed dataset
+
+    print("✅ 'combined_features' column created!")
 
 # ✅ Ensure 'combined_features' is available
 if "combined_features" not in df.columns:
@@ -89,22 +101,26 @@ if st.button("Get Recommendations"):
         st.session_state["recommendations"] = recommendations
 
 # ✅ Display the Exact Matched Song First
-if st.session_state["matched_song"] is not None:
-    matched_song = st.session_state["matched_song"]
-    
-    st.markdown("### 🎯 Exact Match Found")
-    col1, col2, col3 = st.columns([1, 3, 1])
-    with col1:  
-        st.image(matched_song["album_art_url"], width=120)
+if st.session_state["recommendations"] is not None:
+    st.markdown("### 🎶 Recommended Songs")
 
-    with col2:  
-        st.write(f"**{matched_song['name']}**")
-        st.write(f"*{matched_song['artist']}*")
+    for index, row in st.session_state["recommendations"].iterrows():  # ✅ Correctly define `index`
+        album_art_url = row.get("album_art_url", "https://via.placeholder.com/150")
+        track_id = row["id"]
 
-    with col3:  
-        if st.button("▶ Play", key=f"play_{matched_song['id']}"):
-            st.session_state["selected_track_id"] = matched_song["id"]
-            st.rerun()
+        col1, col2, col3 = st.columns([1, 3, 1])
+        with col1:
+            st.image(album_art_url, width=120)
+
+        with col2:
+            st.write(f"**{row['name']}**")
+            st.write(f"*{row['artist']}*")
+
+        with col3:
+            unique_key = f"play_{row['id']}_{index}_{uuid.uuid4().hex}"  # ✅ Fully unique key
+            if st.button("▶ Play", key=unique_key):
+                st.session_state["selected_track_id"] = track_id
+                st.rerun()
 
     st.markdown("---")
 
@@ -124,8 +140,11 @@ if st.session_state["recommendations"] is not None:
             st.write(f"**{row['name']}**")
             st.write(f"*{row['artist']}*")
 
-        with col3:  
-            if st.button("▶ Play", key=f"play_{row['id']}"):
+        with col3:
+            for index, row in st.session_state["recommendations"].iterrows():  # ✅ Define `index`
+                unique_key = f"play_{row['id']}_{index}_{uuid.uuid4().hex}"
+            unique_key = f"play_{row['id']}_{index}_{uuid.uuid4().hex}" # ✅ Add `index` to make keys unique
+            if st.button("▶ Play", key=unique_key):
                 st.session_state["selected_track_id"] = track_id
                 st.rerun()
 

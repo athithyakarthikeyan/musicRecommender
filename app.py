@@ -8,12 +8,13 @@ import pickle
 import difflib
 
 # ✅ Load preprocessed data
-df = pd.read_csv("tamil_spotify_tracks.csv")
+df = pd.read_csv("spotify_playlist_data.csv")
 with open("similarity_matrix.pkl", "rb") as f:
     similarity_matrix = pickle.load(f)
 
 # ✅ Function to Find Closest Song Matches
 def find_best_match(input_song):
+    df["name"] = df["name"].fillna("").astype(str)  # ✅ Convert NaN to empty strings
     matches = difflib.get_close_matches(input_song.lower(), df["name"].str.lower(), n=5, cutoff=0.3)
     if matches:
         return df[df["name"].str.lower() == matches[0]]["name"].values[0]
@@ -94,7 +95,8 @@ if st.session_state["recommendations"] is not None:
             st.write(f"*{row['artist']}*")
 
         with col3:  # ✅ Right - Play Button (HTML Symbol)
-            if st.button("▶ Play", key=f"play_{row['id']}", on_click=play_song, args=(track_id,)):
+            unique_key = f"play_{row['id']}_{_}"  # ✅ Add loop index `_` to make the key unique
+            if st.button("▶ Play", key=unique_key, on_click=play_song, args=(track_id,)):
                 st.session_state["selected_track_id"] = track_id  # ✅ Update track ID
                 st.rerun()  # ✅ Refresh UI to trigger autoplay
 

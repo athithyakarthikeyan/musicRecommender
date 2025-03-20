@@ -76,7 +76,7 @@ if __name__ == "__main__":
 
     if df_tamil_tracks is not None and not df_tamil_tracks.empty:
         print("\n✅ Tamil Songs Fetched Successfully!")
-        df_tamil_tracks.to_csv("tamil_spotify_tracks.csv", index=False)
+        df_tamil_tracks.to_csv("spotify_playlist_data.csv", index=False)  # ✅ Save to the correct CSV file
         print("\n✅ Data saved to `tamil_spotify_tracks.csv`!")
     else:
         print("\n❌ No Tamil songs found in the selected playlist.")
