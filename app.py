@@ -1,46 +1,51 @@
+import os
+import pickle
 import pandas as pd
 import streamlit as st
-import difflib
-import pickle
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.neighbors import NearestNeighbors
 
-# ✅ Load Data
-df = pd.read_csv("spotify_tracks_preprocessed.csv")
-df["name"] = df["name"].fillna("").astype(str)  # ✅ Ensure names are strings
+# ✅ Load dataset
+df = pd.read_csv("spotify_playlist_data.csv")
 
+# ✅ Ensure 'combined_features' Exists
+if "combined_features" not in df.columns:
+    df["artist"] = df["artist"].fillna("")
+    df["album"] = df["album"].fillna("")
+    df["genres"] = df["genres"].fillna("")
+    df["name"] = df["name"].fillna("").astype(str)
+    df["combined_features"] = df["artist"] + " " + df["album"] + " " + df["genres"]
+    df.to_csv("spotify_tracks_preprocessed.csv", index=False)
+
+# ✅ Check if model exists, otherwise train it
+if not os.path.exists("knn_model.pkl"):
+    print("\n🚀 Training KNN Model...")
+    vectorizer = TfidfVectorizer(stop_words="english")
+    feature_matrix = vectorizer.fit_transform(df["combined_features"])
+
+    knn_model = NearestNeighbors(n_neighbors=10, metric="euclidean")
+    knn_model.fit(feature_matrix)
+
+    with open("knn_model.pkl", "wb") as f:
+        pickle.dump(knn_model, f)
+    with open("tfidf_vectorizer.pkl", "wb") as f:
+        pickle.dump(vectorizer, f)
+
+    print("✅ KNN Model Training Complete!")
+
+# ✅ Load Models
 with open("knn_model.pkl", "rb") as f:
     knn_model = pickle.load(f)
 with open("tfidf_vectorizer.pkl", "rb") as f:
     vectorizer = pickle.load(f)
 
-# ✅ Find Best Song Match
-def find_best_match(input_song):
-    """Find the closest matching song"""
-    matches = difflib.get_close_matches(input_song.lower(), df["name"].str.lower(), n=5, cutoff=0.3)
-    if not matches:
-        return None
-    return df[df["name"].str.lower() == matches[0]].iloc[0]
-
-# ✅ Recommend Songs
-def recommend_songs(song_input, num_recommendations=5):
-    matched_song = find_best_match(song_input)
-    if matched_song is None:
-        return None, "❌ No matching song found!"
-
-    song_vector = vectorizer.transform([matched_song["combined_features"]])
-    distances, indices = knn_model.kneighbors(song_vector, n_neighbors=num_recommendations + 1)
-
-    recommendations = df.iloc[indices[0][1:num_recommendations + 1]][["name", "artist", "album", "album_art_url"]]
-    return recommendations, None
-
 # ✅ Streamlit Web App
-st.title("🎵 Tamil Music Recommender")
-song_input = st.text_input("Enter a song name:")
+st.title("🎵 Tamil Song Recommendation Engine")
+st.write("🔍 Enter a song name to get recommendations.")
 
-if st.button("Get Recommendations"):
-    recommendations, error = recommend_songs(song_input)
-    if error:
-        st.error(error)
-    else:
-        for _, row in recommendations.iterrows():
-            st.image(row["album_art_url"], width=120)
-            st.write(f"**{row['name']}** - *{row['artist']}*")
+with st.form("song_search"):
+    song_input = st.text_input("🎶 Enter Song Name:", "")
+    submitted = st.form_submit_button("Get Recommendations")
+
+if submitted and song_input:
+    st.success(f"🎶 Showing recommendations for: **{song_input}**")
