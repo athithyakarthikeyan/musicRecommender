@@ -1,1 +1,1 @@
-Tamil music recommendation using Cosign Similarity Algorithm.
+Tamil music recommendation using Cosine Similarity Algorithm.
