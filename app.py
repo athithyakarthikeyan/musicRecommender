@@ -64,7 +64,7 @@ st.markdown(
 )
 
 st.title("🎵 Tamil Song Recommendation Engine \n ")
-st.header("Using Cosine Simailairty Alogrithm.")
+st.header("Using Cosine Similarity Algorithm.")
 st.write("🔍 Enter a song name (or part of a song name) to get recommendations.")
 
 with st.form("song_search"):
