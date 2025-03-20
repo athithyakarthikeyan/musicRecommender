@@ -1,32 +1,39 @@
+#
+# Algorithm: KNN
+#
 import pandas as pd
-import pickle
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.neighbors import NearestNeighbors
+import pickle
 
 # ✅ Load dataset
-df = pd.read_csv("spotify_playlist_data.csv")
+df = pd.read_csv("tamil_spotify_tracks.csv")
 
-# ✅ Fix missing song names
-df["name"] = df["name"].fillna("").astype(str)
+# ✅ Ensure no missing values in important columns
 df["artist"] = df["artist"].fillna("")
 df["album"] = df["album"].fillna("")
 df["genres"] = df["genres"].fillna("")
 
-# ✅ Ensure 'combined_features' exists
+# ✅ Create 'combined_features' by merging artist, album, and genres
 df["combined_features"] = df["artist"] + " " + df["album"] + " " + df["genres"]
 
-# ✅ Train KNN Model
+# ✅ TF-IDF Vectorization on Combined Features
 vectorizer = TfidfVectorizer(stop_words="english")
 feature_matrix = vectorizer.fit_transform(df["combined_features"])
 
+# ✅ Train KNN Model
 knn_model = NearestNeighbors(n_neighbors=10, metric="euclidean")
 knn_model.fit(feature_matrix)
 
-# ✅ Save processed data
-df.to_csv("spotify_tracks_preprocessed.csv", index=False)
+# ✅ Save Preprocessed Data and KNN Model
+df.to_csv("tamil_spotify_tracks_preprocessed.csv", index=False)
+
 with open("knn_model.pkl", "wb") as f:
     pickle.dump(knn_model, f)
 with open("tfidf_vectorizer.pkl", "wb") as f:
     pickle.dump(vectorizer, f)
 
-print("✅ KNN Model Training Complete!")
+print("✅ Preprocessing Complete! Data and Model Saved Successfully.")
+
+# ✅ Debugging Check
+print(df.columns)  # ✅ Ensure 'combined_features' is present

@@ -6,7 +6,7 @@ import difflib
 import pickle
 
 # ✅ Corrected file paths (remove "/mnt/data/")
-df = pd.read_csv("spotify_playlist_data.csv")  # Ensure correct file path
+df = pd.read_csv("tamil_spotify_tracks_preprocessed.csv")  # Ensure correct file path
 with open("similarity_matrix.pkl", "rb") as f:
     similarity_matrix = pickle.load(f)
 
