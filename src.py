@@ -12,7 +12,7 @@ st.set_page_config(page_title="Tamil Music Recommender", layout="wide")
 def load_data(csv_path):
     return pd.read_csv(csv_path)
 
-csv_file = "src.csv"
+csv_file = "dataset.csv"
 df = load_data(csv_file)
 
 # Drop unnecessary columns and ensure numerical data is clean
